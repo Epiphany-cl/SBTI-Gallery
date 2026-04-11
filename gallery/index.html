@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SBTI 人格图库</title>
+  <meta name="description" content="查看全部 SBTI 人格类型与详细介绍。" />
+  <link rel="stylesheet" href="../src/style.css" />
+</head>
+<body>
+  <div id="app" class="gallery-app">
+    <!-- 列表页 -->
+    <section id="page-list" class="page active">
+      <div class="card intro-card">
+        <h1 class="intro-title">SBTI 人格图库</h1>
+        <p class="intro-credit">方便查看 27 种人格类型的详细信息。</p>
+        <p class="intro-note">这里包含所有标准人格和特殊人格的完整介绍。</p>
+        <div class="result-actions" style="justify-content:center; gap:12px; margin-top:24px;">
+          <a class="btn btn-secondary" href="../">回到测试首页</a>
+          <button id="btn-refresh" class="btn btn-primary">刷新列表</button>
+        </div>
+      </div>
+      <div id="gallery-grid" class="gallery-grid"></div>
+    </section>
+
+    <!-- 详情页 -->
+    <section id="page-detail" class="page">
+      <div class="card result-card">
+        <div class="result-actions" style="justify-content: flex-start; margin-bottom: 20px;">
+          <button id="btn-back" class="btn btn-secondary">← 返回图库</button>
+        </div>
+        <img id="detail-img" class="detail-img" src="" alt="" />
+        <div class="result-code" id="detail-code"></div>
+        <div class="result-name" id="detail-name"></div>
+        <div id="detail-pattern" class="result-badge"></div>
+        <div class="result-intro" id="detail-intro"></div>
+        <div class="result-desc" id="detail-desc"></div>
+        <div class="result-actions">
+          <a class="btn btn-primary" href="../">去测试我的类型</a>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script type="module" src="../src/gallery.js"></script>
+</body>
+</html>
