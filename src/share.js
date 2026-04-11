@@ -5,13 +5,35 @@
 const LEVEL_NUM = { L: 1, M: 2, H: 3 }
 const LEVEL_LABEL = { L: '低', M: '中', H: '高' }
 
+const IMAGE_MAP = {
+  'OG8K': 'OJBK.png',
+  'FU?K': 'FUCK.png',
+  'Dior-s': 'Dior-s.jpg',
+  'JOKE-R': 'JOKE-R.jpg',
+}
+
+function getImageUrl(code) {
+  const filename = IMAGE_MAP[code] || `${code}.png`
+  return `/SBTI/${filename}`
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => resolve(img)
+    img.onerror = reject
+    img.src = src
+  })
+}
+
 /**
  * 生成分享卡片并下载
  */
 export async function generateShareImage(primary, userLevels, dimOrder, dimDefs, mode) {
   const dpr = 2
   const W = 720
-  const H = 1280
+  const H = 1600 // 增加高度以容纳更多内容
   const canvas = document.createElement('canvas')
   canvas.width = W * dpr
   canvas.height = H * dpr
@@ -27,9 +49,8 @@ export async function generateShareImage(primary, userLevels, dimOrder, dimDefs,
   roundRect(ctx, cardX, cardY, cardW, cardH, 20)
   ctx.fillStyle = '#ffffff'
   ctx.fill()
-  ctx.shadowColor = 'transparent'
 
-  let y = cardY + 48
+  let y = cardY + 50
 
   // Kicker
   ctx.textAlign = 'center'
@@ -37,19 +58,23 @@ export async function generateShareImage(primary, userLevels, dimOrder, dimDefs,
   ctx.fillStyle = '#6b7b6e'
   const kickerText = mode === 'drunk' ? '隐藏人格已激活' : mode === 'fallback' ? '系统强制兜底' : '你的主类型'
   ctx.fillText(kickerText, W / 2, y)
-  y += 56
-
-  // 类型代码
-  ctx.font = '900 72px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
-  ctx.fillStyle = '#4c6752'
-  ctx.fillText(primary.code, W / 2, y)
   y += 40
 
-  // 中文名
-  ctx.font = '600 32px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
-  ctx.fillStyle = '#2c3e2d'
-  ctx.fillText(primary.cn, W / 2, y)
-  y += 36
+  // 绘制人格图片
+  try {
+    const mainImg = await loadImage(getImageUrl(primary.code))
+    const imgSize = 320
+    const imgX = (W - imgSize) / 2
+    ctx.save()
+    roundRect(ctx, imgX, y, imgSize, imgSize, 16)
+    ctx.clip()
+    ctx.drawImage(mainImg, imgX, y, imgSize, imgSize)
+    ctx.restore()
+    y += imgSize + 40
+  } catch (e) {
+    console.error('Failed to load image for share', e)
+    y += 20
+  }
 
   // 匹配度徽章
   const badgeText = `匹配度 ${primary.similarity}%` + (primary.exact != null ? ` · 精准命中 ${primary.exact}/15 维` : '')
@@ -60,76 +85,43 @@ export async function generateShareImage(primary, userLevels, dimOrder, dimDefs,
   ctx.fill()
   ctx.fillStyle = '#4c6752'
   ctx.fillText(badgeText, W / 2, y + 6)
-  y += 44
+  y += 60
 
   // Intro
-  ctx.font = 'italic 600 22px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
+  ctx.font = 'italic 600 24px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
   ctx.fillStyle = '#2c3e2d'
-  const introLines = wrapText(ctx, primary.intro || '', cardW - 80)
+  const introLines = wrapText(ctx, primary.intro || '', cardW - 100)
   for (const line of introLines) {
     ctx.fillText(line, W / 2, y)
-    y += 30
+    y += 36
   }
-  y += 16
+  y += 20
+
+  // Description
+  ctx.textAlign = 'left'
+  ctx.font = '400 20px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
+  ctx.fillStyle = '#6b7b6e'
+  const descLines = wrapText(ctx, primary.desc || '', cardW - 120)
+  const lineH = 32
+  for (const line of descLines) {
+    ctx.fillText(line, cardX + 60, y)
+    y += lineH
+  }
+  y += 40
 
   // 雷达图
   const radarCx = W / 2
   const radarCy = y + 150
   const radarR = 130
   drawShareRadar(ctx, radarCx, radarCy, radarR, userLevels, dimOrder, dimDefs)
-  y = radarCy + radarR + 40
-
-  // 维度条形图
-  y += 10
-  ctx.textAlign = 'left'
-  const barX = cardX + 48
-  const barMaxW = cardW - 96
-  const dimNameW = 110
-
-  for (const dim of dimOrder) {
-    const level = userLevels[dim] || 'M'
-    const val = LEVEL_NUM[level]
-    const def = dimDefs[dim]
-    if (!def) continue
-
-    const name = def.name.replace(/^[A-Za-z0-9]+\s*/, '')
-
-    // 维度名
-    ctx.font = '600 16px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
-    ctx.fillStyle = '#2c3e2d'
-    ctx.fillText(name, barX, y)
-
-    // 进度条背景
-    const progX = barX + dimNameW
-    const progW = barMaxW - dimNameW - 50
-    const progH = 12
-    roundRect(ctx, progX, y - 10, progW, progH, 6)
-    ctx.fillStyle = '#e8f0ea'
-    ctx.fill()
-
-    // 进度条填充
-    const fillW = (val / 3) * progW
-    roundRect(ctx, progX, y - 10, fillW, progH, 6)
-    ctx.fillStyle = val === 3 ? '#2d7a4a' : val === 2 ? '#4c6752' : '#b8860b'
-    ctx.fill()
-
-    // 等级标签
-    ctx.textAlign = 'right'
-    ctx.font = '600 14px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
-    ctx.fillStyle = val === 3 ? '#2d7a4a' : val === 2 ? '#4c6752' : '#b8860b'
-    ctx.fillText(LEVEL_LABEL[level], barX + barMaxW, y)
-    ctx.textAlign = 'left'
-
-    y += 26
-  }
-
-  y += 16
+  y = radarCy + radarR + 60
 
   // 底部水印
   ctx.textAlign = 'center'
   ctx.font = '400 18px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
   ctx.fillStyle = '#aab8ac'
-  ctx.fillText('SBTI 人格测试 · 仅供娱乐', W / 2, H - cardY - 24)
+  const currentUrl = window.location.origin + window.location.pathname
+  ctx.fillText(`SBTI 人格测试 · 仅供娱乐 · ${currentUrl}`, W / 2, H - cardY - 30)
 
   // 下载
   const link = document.createElement('a')
