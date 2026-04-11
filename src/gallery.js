@@ -1,9 +1,14 @@
+import { drawRadar } from './chart.js'
+
 const IMAGE_MAP = {
   'OG8K': 'OJBK.png',
   'FU?K': 'FUCK.png',
   'Dior-s': 'Dior-s.jpg',
   'JOKE-R': 'JOKE-R.jpg',
 }
+
+let dimOrder = []
+let dimDefs = {}
 
 function getImageUrl(code) {
   const filename = IMAGE_MAP[code] || `${code}.png`
@@ -21,13 +26,33 @@ function showPage(pageId) {
   window.scrollTo(0, 0)
 }
 
+function parsePattern(pattern) {
+  if (!pattern) return null
+  const chars = pattern.replace(/-/g, '').split('')
+  const levels = {}
+  dimOrder.forEach((dim, i) => {
+    levels[dim] = chars[i] || 'M'
+  })
+  return levels
+}
+
 function renderDetail(type) {
   document.getElementById('detail-img').src = getImageUrl(type.code)
   document.getElementById('detail-code').textContent = type.code
   document.getElementById('detail-name').textContent = type.cn
-  document.getElementById('detail-pattern').textContent = type.pattern || 'Special'
   document.getElementById('detail-intro').textContent = type.intro || ''
   document.getElementById('detail-desc').textContent = type.desc || ''
+
+  const canvas = document.getElementById('detail-radar-chart')
+  const userLevels = parsePattern(type.pattern)
+
+  if (userLevels) {
+    canvas.parentElement.style.display = 'block'
+    drawRadar(canvas, userLevels, dimOrder, dimDefs)
+  } else {
+    canvas.parentElement.style.display = 'none'
+  }
+
   showPage('page-detail')
 }
 
@@ -103,7 +128,12 @@ function renderGallery(types) {
 }
 
 async function init() {
-  const types = await loadJSON(new URL('../data/types.json', import.meta.url).href)
+  const [types, dims] = await Promise.all([
+    loadJSON(new URL('../data/types.json', import.meta.url).href),
+    loadJSON(new URL('../data/dimensions.json', import.meta.url).href)
+  ])
+  dimOrder = dims.order
+  dimDefs = dims.definitions
   renderGallery(types)
 }
 
