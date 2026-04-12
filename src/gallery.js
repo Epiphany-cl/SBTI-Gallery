@@ -1,19 +1,8 @@
 import { drawRadar } from './chart.js'
-
-const IMAGE_MAP = {
-  'OG8K': 'OJBK.png',
-  'FU?K': 'FUCK.png',
-  'Dior-s': 'Dior-s.jpg',
-  'JOKE-R': 'JOKE-R.jpg',
-}
+import { getImageUrl } from './assets.js'
 
 let dimOrder = []
 let dimDefs = {}
-
-function getImageUrl(code) {
-  const filename = IMAGE_MAP[code] || `${code}.png`
-  return `../${filename}` // Vite public folder assets are at root
-}
 
 async function loadJSON(path) {
   const res = await fetch(path)

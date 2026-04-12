@@ -85,6 +85,23 @@ body {
   color: var(--text-secondary);
 }
 
+.intro-repo {
+  margin-top: 8px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  word-break: break-all;
+}
+
+.intro-repo a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.intro-repo a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
 .intro-note {
   margin-top: 8px;
   font-size: 0.8rem;

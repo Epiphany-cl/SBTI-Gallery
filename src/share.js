@@ -1,21 +1,10 @@
 /**
  * 生成分享图片 — 纯 Canvas 绘制，无外部依赖
  */
+import { getImageUrl } from './assets.js'
 
 const LEVEL_NUM = { L: 1, M: 2, H: 3 }
 const LEVEL_LABEL = { L: '低', M: '中', H: '高' }
-
-const IMAGE_MAP = {
-  'OG8K': 'OJBK.png',
-  'FU?K': 'FUCK.png',
-  'Dior-s': 'Dior-s.jpg',
-  'JOKE-R': 'JOKE-R.jpg',
-}
-
-function getImageUrl(code) {
-  const filename = IMAGE_MAP[code] || `${code}.png`
-  return `/SBTI/${filename}`
-}
 
 function loadImage(src) {
   return new Promise((resolve, reject) => {

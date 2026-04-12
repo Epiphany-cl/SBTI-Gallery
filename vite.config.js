@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import { resolve } from 'path'
 
 export default defineConfig({
-  base: '/SBTI/',
+  base: '/SBTI-Gallery/',
   build: {
     outDir: 'dist',
     rollupOptions: {

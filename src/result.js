@@ -1,20 +1,9 @@
 import { drawRadar } from './chart.js'
 import { generateShareImage } from './share.js'
+import { getImageUrl } from './assets.js'
 
 const LEVEL_LABEL = { L: '低', M: '中', H: '高' }
 const LEVEL_CLASS = { L: 'level-low', M: 'level-mid', H: 'level-high' }
-
-const IMAGE_MAP = {
-  'OG8K': 'OJBK.png',
-  'FU?K': 'FUCK.png',
-  'Dior-s': 'Dior-s.jpg',
-  'JOKE-R': 'JOKE-R.jpg',
-}
-
-function getImageUrl(code) {
-  const filename = IMAGE_MAP[code] || `${code}.png`
-  return `/SBTI/${filename}` // Use base path for Vite
-}
 
 /**
  * 渲染测试结果
